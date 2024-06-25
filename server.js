@@ -1,13 +1,17 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Use CORS middleware
+app.use(cors());
+
 // Configure your email service
 const transporter = nodemailer.createTransport({
-  service: 'gmail.com',
+  service: 'gmail',
   auth: {
     user: 'sijgeriaucssangha@gmail.com',
     pass: 'cukc drra ypkd viay',
@@ -17,20 +21,15 @@ const transporter = nodemailer.createTransport({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve the HTML page
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
 // Handle form submission
-app.post('/subscribe', (req, res) => {
-  const email = req.body.email;
+app.post('/send-email', (req, res) => {
+  const { name, email, subject, message } = req.body;
 
   const mailOptions = {
     from: 'sijgeriaucssangha@gmail.com',
-    to: email,
-    subject: 'Subscription Confirmation',
-    text: 'You have successfully subscribed to our page. You will receive email notifications for updates.',
+    to: 'club-email@example.com', // Replace with your club's email address
+    subject: subject,
+    text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -39,7 +38,7 @@ app.post('/subscribe', (req, res) => {
       res.status(500).send('Error sending email.');
     } else {
       console.log('Email sent: ' + info.response);
-      res.status(200).send('Subscription successful. You will receive email notifications.');
+      res.status(200).send('Message sent successfully!');
     }
   });
 });
